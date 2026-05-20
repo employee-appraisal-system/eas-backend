@@ -2,7 +2,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 from dotenv import load_dotenv
-# DATABASE_URL = "postgresql://postgres:a@localhost/Employee_Appraisal"
 
 # Load environment variables from .env
 load_dotenv()
