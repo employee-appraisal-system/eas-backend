@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from Scheduler.jobs import start_scheduler 
 from routes import employee
 from routes.appraisal_cycle import router as cycle_router
@@ -24,10 +23,7 @@ def startup_event():
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["http://localhost:3000"], 
-    allow_origins=["https://employee-appraisal-system-frontend-seven.vercel.app"],  
-    # allow_origins=["https://bluepineapple-employee-appraisal-system.vercel.app"],   # Bhagyashree
-   
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],  # Allow all headers
