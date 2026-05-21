@@ -4,7 +4,8 @@ from unittest.mock import MagicMock
 from datetime import date
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from main import app
 from models.appraisal_cycle import AppraisalCycle
 from models.employee_allocation import EmployeeAllocation
@@ -13,6 +14,7 @@ from models.parameters import Parameter
 from models.lead_assessment import LeadAssessmentRating
 
 client = TestClient(app)
+
 
 # Override get_db with a mock
 @pytest.fixture
@@ -26,7 +28,7 @@ def mock_db_session(monkeypatch):
         cycle_id=1,
         stage_name="Lead Assessment",
         start_date_of_stage=date(2025, 5, 1),
-        end_date_of_stage=date(2025, 5, 31)
+        end_date_of_stage=date(2025, 5, 31),
     )
     mock_parameter = Parameter(parameter_id=1)
 
@@ -56,20 +58,16 @@ def test_save_rating_success(mock_db_session):
         "cycle_id": 1,
         "employee_id": 101,
         "ratings": [
-            {
-                "parameter_id": 1,
-                "parameter_rating": 4,
-                "specific_input": "Good effort"
-            }
+            {"parameter_id": 1, "parameter_rating": 4, "specific_input": "Good effort"}
         ],
-        "discussion_date": "2025-05-12"
+        "discussion_date": "2025-05-12",
     }
 
     response = client.post("/lead_assessment/save_rating", json=payload)
     assert response.status_code == 200
     assert response.json()["message"] in [
         "Lead assessment rating saved successfully.",
-        "No changes detected."
+        "No changes detected.",
     ]
     # assert response.json() == {"status": "success", "cycle_id": 1, "employee_id": 101}
 

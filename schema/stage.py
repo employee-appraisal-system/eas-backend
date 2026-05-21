@@ -2,20 +2,23 @@ from pydantic import BaseModel
 from datetime import date
 from typing import Optional
 
+
 class StageBase(BaseModel):
     stage_name: str
     cycle_id: int
     start_date_of_stage: date
     end_date_of_stage: date
 
+
 class StageCreate(StageBase):
-    pass  
+    pass
+
 
 class StageResponse(StageBase):
     stage_id: int
 
     class Config:
-        orm_mode = True  
+        orm_mode = True
 
 
 class StageInfoResponse(BaseModel):

@@ -18,10 +18,10 @@ Base = declarative_base()
 
 
 def get_db():
-    db = SessionLocal()         # FastAPI calls the function and gets the session from sessionLocal
+    db = (
+        SessionLocal()
+    )  # FastAPI calls the function and gets the session from sessionLocal
     try:
-        yield db                # Then it temporarily pause and use this session (inject it into route)
+        yield db  # Then it temporarily pause and use this session (inject it into route)
     finally:
-        db.close()              # After the use is done, it comes back and close the session
-
-
+        db.close()  # After the use is done, it comes back and close the session

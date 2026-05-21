@@ -1,8 +1,8 @@
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database.connection import get_db
 from dao.edit_appraisal_cycle import get_cycle, edit_cycle
+
 # update_appraisal_cycle
 from schema.edit_appraisal_cycle import GetAppraisalCycleResponse
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
@@ -28,16 +28,24 @@ def get_appraisal_cycle(cycle_id: int, db: Session = Depends(get_db)):
         logging.error(f"HTTP error for cycle with ID {cycle_id}: {http_err.detail}")
         raise
     except SQLAlchemyError as db_err:
-        logging.error(f"Database error while retrieving cycle with ID {cycle_id}: {str(db_err)}")
-        raise HTTPException(status_code=500, detail="Database error while retrieving appraisal cycle")
+        logging.error(
+            f"Database error while retrieving cycle with ID {cycle_id}: {str(db_err)}"
+        )
+        raise HTTPException(
+            status_code=500, detail="Database error while retrieving appraisal cycle"
+        )
     except Exception as e:
         logging.error(f"Unexpected error retrieving cycle with ID {cycle_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error while retrieving appraisal cycle")
-
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while retrieving appraisal cycle",
+        )
 
 
 @router.put("/edit-appraisal-cycle/{cycle_id}")
-def edit_appraisal_cycle(cycle_id: int, cycle_data: CycleUpdate, db: Session = Depends(get_db)):
+def edit_appraisal_cycle(
+    cycle_id: int, cycle_data: CycleUpdate, db: Session = Depends(get_db)
+):
     """
     Update an appraisal cycle by its ID
     """
@@ -53,8 +61,15 @@ def edit_appraisal_cycle(cycle_id: int, cycle_data: CycleUpdate, db: Session = D
         logging.error(f"Validation error for cycle with ID {cycle_id}: {str(val_err)}")
         raise HTTPException(status_code=422, detail=str(val_err))
     except SQLAlchemyError as db_err:
-        logging.error(f"Database error while updating cycle with ID {cycle_id}: {str(db_err)}")
-        raise HTTPException(status_code=500, detail="Database error while updating appraisal cycle")
+        logging.error(
+            f"Database error while updating cycle with ID {cycle_id}: {str(db_err)}"
+        )
+        raise HTTPException(
+            status_code=500, detail="Database error while updating appraisal cycle"
+        )
     except Exception as e:
         logging.error(f"Unexpected error updating cycle with ID {cycle_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error while updating appraisal cycle")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while updating appraisal cycle",
+        )

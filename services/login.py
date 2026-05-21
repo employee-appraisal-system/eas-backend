@@ -3,19 +3,20 @@ from dao.employee import get_employee_by_role_id
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 
+
 def authenticate_employee(db: Session, employee_id: int, password: str):
     """Authenticate employee by checking if the provided password matches the stored one."""
     try:
-        # To fetch the employee based on role ID 
+        # To fetch the employee based on role ID
         employee = get_employee_by_role_id(db, employee_id)
 
         # For no employee found
         if not employee:
-            return None 
+            return None
 
         # For password mismatch
         if employee.password != password:
-            return None 
+            return None
 
         # For successful authentication
         return employee
@@ -24,12 +25,12 @@ def authenticate_employee(db: Session, employee_id: int, password: str):
         print(f"Database error occurred: {exception}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database error occurred"
+            detail="Database error occurred",
         )
 
     except Exception as e:
         print(f"Unexpected error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            detail="An unexpected error occurred",
         )

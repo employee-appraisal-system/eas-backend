@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
+
+
 class EmployeeListResponse(BaseModel):
     employee_id: int
     employee_name: str
@@ -12,10 +14,10 @@ class EmployeeResponse(BaseModel):
     role: str
     reporting_manager_name: Optional[str] = None
     previous_reporting_manager_name: Optional[str] = None
+
     class Config:
         orm_mode = True
 
+
 class EmployeeRoleResponse(BaseModel):
     role: str
-
-

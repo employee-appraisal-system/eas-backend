@@ -1,14 +1,15 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from dao.employee import (
-    fetch_all_employees, 
-    get_all_employees_sorted , 
-    get_employees_under_manager, 
-    get_employee_by_id, 
-    get_employee_manager, 
-    get_employee_details, 
-    get_employees_under_team_lead
+    fetch_all_employees,
+    get_all_employees_sorted,
+    get_employees_under_manager,
+    get_employee_by_id,
+    get_employee_manager,
+    get_employee_details,
+    get_employees_under_team_lead,
 )
+
 
 # Get list of all employees
 def get_all_employees(db: Session):
@@ -16,13 +17,15 @@ def get_all_employees(db: Session):
         return fetch_all_employees(db)
     except HTTPException:
         raise
-    
+
+
 # Get sorted list of all employees
 def get_sorted_employees(db: Session):
     try:
         return get_all_employees_sorted(db)
     except HTTPException:
         raise
+
 
 # Get the list of employees under the particular team lead
 def fetch_employees_under_manager(db: Session, manager_id: int):
@@ -31,6 +34,7 @@ def fetch_employees_under_manager(db: Session, manager_id: int):
         return employees
     except Exception as e:
         raise e
+
 
 # Get the reporting manager of the employee
 def fetch_reporting_manager(db: Session, employee_id: int):
@@ -48,11 +52,12 @@ def fetch_reporting_manager(db: Session, employee_id: int):
 
         return {
             "reporting_manager_id": manager.employee_id,
-            "reporting_manager_name": manager.employee_name
+            "reporting_manager_name": manager.employee_name,
         }, None
     except Exception as e:
         raise e
-    
+
+
 # Get the details of the employee
 def fetch_employee_details(db: Session, employee_id: int):
     try:
@@ -62,7 +67,8 @@ def fetch_employee_details(db: Session, employee_id: int):
         return employee_data, None
     except Exception as e:
         raise e
-    
+
+
 # Get the list of employees under the particular team lead
 def fetch_employees_under_team_lead(db: Session, cycle_id: int, team_lead_id: int):
     try:

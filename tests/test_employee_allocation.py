@@ -5,12 +5,13 @@ from unittest.mock import MagicMock
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from main import app
 from database.connection import get_db
 from models.employee_allocation import EmployeeAllocation
 
 client = TestClient(app)
+
 
 # --------------------------
 # Helper: Dependency override
@@ -29,7 +30,9 @@ class MockQuery:
 #  Test: Successful allocation
 def test_successful_allocation():
     mock_db = MagicMock()
-    mock_db.query.return_value = MockQuery([MagicMock(employee_id=1), MagicMock(employee_id=2)])
+    mock_db.query.return_value = MockQuery(
+        [MagicMock(employee_id=1), MagicMock(employee_id=2)]
+    )
 
     app.dependency_overrides[get_db] = lambda: mock_db
 
@@ -59,6 +62,7 @@ def test_database_error():
     class ErrorQuery:
         def filter(self, *args, **kwargs):
             return self
+
         def all(self):
             raise SQLAlchemyError("DB connection failed")
 
@@ -77,8 +81,10 @@ def test_database_error():
 #  Test: Unexpected error
 def test_unexpected_error():
     mock_db = MagicMock()
+
     def broken_query(*args, **kwargs):
         raise Exception("Unknown failure")
+
     mock_db.query.side_effect = broken_query
 
     app.dependency_overrides[get_db] = lambda: mock_db

@@ -3,15 +3,18 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 from datetime import date
 
+
 class RatingBase(BaseModel):
     parameter_id: int
     rating: int = Field(..., ge=1, le=4)
     specific_input: Optional[str] = None
 
+
 class RatingRequest(RatingBase):
     cycle_id: int
     employee_id: int
     discussion_date: date
+
 
 class RatingResponse(RatingBase):
     lead_rating_id: int
@@ -23,11 +26,13 @@ class RatingResponse(RatingBase):
     class Config:
         from_attributes = True
 
+
 class BatchRatingRequest(BaseModel):
     cycle_id: int
     employee_id: int
     discussion_date: date
     ratings: List[RatingBase]
+
 
 class AssessmentStatus(BaseModel):
     cycle_id: int

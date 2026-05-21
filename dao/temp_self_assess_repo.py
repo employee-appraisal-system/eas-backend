@@ -1,4 +1,3 @@
-
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func, literal
 from sqlalchemy.orm import aliased
@@ -10,17 +9,18 @@ from models.employee_allocation import EmployeeAllocation
 from typing import List, Dict
 from logger_config import logging
 
+
 def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
     """
     Retrieve self-assessment responses for a specific cycle
-    
+
     Args:
         db: Database session
         cycle_id: ID of the appraisal cycle
-    
+
     Returns:
         List of dictionaries containing self-assessment responses
-    
+
     Raises:
         ValueError: For invalid input parameters
         SQLAlchemyError: For database-related errors
@@ -29,7 +29,9 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
         # Validate input
         if not isinstance(cycle_id, int) or cycle_id <= 0:
             logging.warning(f"Invalid cycle_id provided: {cycle_id}")
-            raise ValueError(f"Invalid cycle_id: {cycle_id}. Must be a positive integer.")
+            raise ValueError(
+                f"Invalid cycle_id: {cycle_id}. Must be a positive integer."
+            )
 
         # Create alias for Question to avoid ambiguity
         QuestionAlias = aliased(Question)
@@ -57,16 +59,18 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
                 Employee.employee_id,
                 Employee.employee_name,
                 Question.question_text,
-                func.coalesce(SelfAssessmentResponse.response_text, literal('-')).label('response_text')
+                func.coalesce(SelfAssessmentResponse.response_text, literal("-")).label(
+                    "response_text"
+                ),
             )
             .select_from(cross_joined)
             .join(Employee, Employee.employee_id == cross_joined.c.employee_id)
             .join(Question, Question.question_id == cross_joined.c.question_id)
             .outerjoin(
                 SelfAssessmentResponse,
-                (SelfAssessmentResponse.employee_id == cross_joined.c.employee_id) &
-                (SelfAssessmentResponse.question_id == cross_joined.c.question_id) &
-                (SelfAssessmentResponse.cycle_id == cycle_id)
+                (SelfAssessmentResponse.employee_id == cross_joined.c.employee_id)
+                & (SelfAssessmentResponse.question_id == cross_joined.c.question_id)
+                & (SelfAssessmentResponse.cycle_id == cycle_id),
             )
             .order_by(Employee.employee_id, Question.question_id)
         )
@@ -77,12 +81,14 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
                 "employee_id": row.employee_id,
                 "employee_name": row.employee_name,
                 "question_text": row.question_text,
-                "response_text": row.response_text
+                "response_text": row.response_text,
             }
             for row in result.all()
         ]
 
-        logging.info(f"Retrieved {len(response)} self-assessment responses for cycle {cycle_id}")
+        logging.info(
+            f"Retrieved {len(response)} self-assessment responses for cycle {cycle_id}"
+        )
 
         return response
 
@@ -91,13 +97,19 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
         raise
 
     except DataError as data_err:
-        logging.error(f"Data error while retrieving responses for cycle {cycle_id}: {str(data_err)}")
+        logging.error(
+            f"Data error while retrieving responses for cycle {cycle_id}: {str(data_err)}"
+        )
         raise SQLAlchemyError(f"Data processing error: {str(data_err)}")
 
     except SQLAlchemyError as db_err:
-        logging.error(f"Database error retrieving responses for cycle {cycle_id}: {str(db_err)}")
+        logging.error(
+            f"Database error retrieving responses for cycle {cycle_id}: {str(db_err)}"
+        )
         raise
 
     except Exception as e:
-        logging.error(f"Unexpected error retrieving responses for cycle {cycle_id}: {str(e)}")
+        logging.error(
+            f"Unexpected error retrieving responses for cycle {cycle_id}: {str(e)}"
+        )
         raise
