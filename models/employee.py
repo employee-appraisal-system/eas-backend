@@ -10,5 +10,5 @@ class Employee(Base):
     role = Column(String(50), nullable=False)
     reporting_manager = Column(Integer, ForeignKey("employee.employee_id", ondelete="SET NULL"), nullable=True)
     previous_reporting_manager = Column(Integer, ForeignKey("employee.employee_id", ondelete="SET NULL"), nullable=True)
-    password = Column(String(10), nullable=False)
+    password = Column(String(256), nullable=True)
 
