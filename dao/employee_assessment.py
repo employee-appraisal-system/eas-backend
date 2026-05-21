@@ -82,11 +82,11 @@ def get_team_lead_cycles(db: Session, team_lead_id: int):
         List of AppraisalCycle objects"""
     # Step 1: Find all employees reporting to this team lead (including the team lead themselves)
     employee_ids = (
-        db.query(Employee.employee_id)
+        db.query(Employee.id)
         .filter(
             or_(
-                Employee.reporting_manager == team_lead_id,
-                Employee.employee_id == team_lead_id,
+                Employee.manager_id == team_lead_id,
+                Employee.id == team_lead_id,
             )
         )
         .all()

@@ -8,7 +8,7 @@ class QuestionAssignment(Base):
 
     assignment_id = Column(Integer, primary_key=True, autoincrement=True)
     employee_id = Column(
-        Integer, ForeignKey("employee.employee_id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("employee.id", ondelete="CASCADE"), nullable=False
     )
     question_id = Column(
         Integer, ForeignKey("question.question_id", ondelete="CASCADE"), nullable=False

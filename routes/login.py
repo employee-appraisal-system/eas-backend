@@ -12,12 +12,12 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     try:
-        employee = authenticate_employee(db, request.employee_id, request.password)
+        employee = authenticate_employee(db, request.email, request.password)
         if not employee:
             raise HTTPException(status_code=401, detail="Invalid credentials")
         return {
             "message": "Login successful",
-            "employee_id": employee.employee_id,
+            "employee_id": employee.id,
             "role": employee.role,
         }
 

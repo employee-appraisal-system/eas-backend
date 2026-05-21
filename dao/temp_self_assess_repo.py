@@ -48,7 +48,7 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
         cross_joined = (
             db.query(EmployeeAllocation.employee_id, subquery_questions.c.question_id)
             .filter(EmployeeAllocation.cycle_id == cycle_id)
-            .join(Employee, Employee.employee_id == EmployeeAllocation.employee_id)
+            .join(Employee, Employee.id == EmployeeAllocation.employee_id)
             .join(subquery_questions, literal(True))  # cross join
             .subquery()
         )
@@ -56,15 +56,15 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
         # Main query to fetch responses
         result = (
             db.query(
-                Employee.employee_id,
-                Employee.employee_name,
+                Employee.id,
+                Employee.full_name,
                 Question.question_text,
                 func.coalesce(SelfAssessmentResponse.response_text, literal("-")).label(
                     "response_text"
                 ),
             )
             .select_from(cross_joined)
-            .join(Employee, Employee.employee_id == cross_joined.c.employee_id)
+            .join(Employee, Employee.id == cross_joined.c.employee_id)
             .join(Question, Question.question_id == cross_joined.c.question_id)
             .outerjoin(
                 SelfAssessmentResponse,
@@ -72,7 +72,7 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
                 & (SelfAssessmentResponse.question_id == cross_joined.c.question_id)
                 & (SelfAssessmentResponse.cycle_id == cycle_id),
             )
-            .order_by(Employee.employee_id, Question.question_id)
+            .order_by(Employee.id, Question.question_id)
         )
 
         # Convert to list of dictionaries

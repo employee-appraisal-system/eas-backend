@@ -1,14 +1,14 @@
 from sqlalchemy.orm import Session
-from dao.employee import get_employee_by_role_id
+from dao.employee import get_employee_by_email
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 
 
-def authenticate_employee(db: Session, employee_id: int, password: str):
+def authenticate_employee(db: Session, email: str, password: str):
     """Authenticate employee by checking if the provided password matches the stored one."""
     try:
         # To fetch the employee based on role ID
-        employee = get_employee_by_role_id(db, employee_id)
+        employee = get_employee_by_email(db, email)
 
         # For no employee found
         if not employee:

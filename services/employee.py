@@ -43,16 +43,16 @@ def fetch_reporting_manager(db: Session, employee_id: int):
         if not employee:
             return None, "Employee not found"
 
-        if not employee.reporting_manager:
+        if not employee.manager_id:
             return None, "No manager assigned"
 
-        manager = get_employee_manager(db, employee.reporting_manager)
+        manager = get_employee_manager(db, employee.manager_id)
         if not manager:
             return None, "Manager not found"
 
         return {
-            "reporting_manager_id": manager.employee_id,
-            "reporting_manager_name": manager.employee_name,
+            "reporting_manager_id": manager.id,
+            "reporting_manager_name": manager.full_name,
         }, None
     except Exception as e:
         raise e

@@ -13,7 +13,7 @@ class EmployeeAllocation(Base):
         nullable=False,
     )
     employee_id = Column(
-        Integer, ForeignKey("employee.employee_id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("employee.id", ondelete="CASCADE"), nullable=False
     )
 
     employee = relationship("Employee")

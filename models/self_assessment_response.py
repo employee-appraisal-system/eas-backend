@@ -13,9 +13,7 @@ class SelfAssessmentResponse(Base):
     cycle_id = Column(
         Integer, ForeignKey("appraisal_cycle.cycle_id", ondelete="CASCADE")
     )
-    employee_id = Column(
-        Integer, ForeignKey("employee.employee_id", ondelete="CASCADE")
-    )
+    employee_id = Column(Integer, ForeignKey("employee.id", ondelete="CASCADE"))
     question_id = Column(
         Integer, ForeignKey("question.question_id", ondelete="CASCADE")
     )

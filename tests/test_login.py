@@ -81,7 +81,7 @@ def mock_db():
 def test_successful_login(mock_db):
     # Mock the authenticate_employee function to return a valid employee
     mock_employee = MagicMock()
-    mock_employee.employee_id = "Emp01"
+    mock_employee.id = "Emp01"
     mock_employee.role = "employee"
     mock_employee.password = "1234"
 

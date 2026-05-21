@@ -28,10 +28,7 @@ def get_employees_under_manager(db: Session, manager_id: int):
     try:
         return (
             db.query(Employee)
-            .filter(
-                (Employee.reporting_manager == manager_id)
-                | (Employee.employee_id == manager_id)
-            )
+            .filter((Employee.manager_id == manager_id) | (Employee.id == manager_id))
             .all()
         )
     except SQLAlchemyError as e:
@@ -43,7 +40,7 @@ def get_employees_under_manager(db: Session, manager_id: int):
 # Fetch employees by employee ID
 def get_employee_by_id(db: Session, employee_id: int):
     try:
-        return db.query(Employee).filter(Employee.employee_id == employee_id).first()
+        return db.query(Employee).filter(Employee.id == employee_id).first()
     except SQLAlchemyError as e:
         raise Exception(
             f"Database error while fetching employee {employee_id}: {str(e)}"
@@ -53,7 +50,7 @@ def get_employee_by_id(db: Session, employee_id: int):
 # Fetch employees by reporting manager ID
 def get_employee_manager(db: Session, manager_id: int):
     try:
-        return db.query(Employee).filter(Employee.employee_id == manager_id).first()
+        return db.query(Employee).filter(Employee.id == manager_id).first()
     except SQLAlchemyError as e:
         raise Exception(f"Database error while fetching manager {manager_id}: {str(e)}")
 
@@ -69,9 +66,7 @@ def get_employee_details(db: Session, employee_id: int):
         Dictionary containing employee details
     """
     try:
-        employee = (
-            db.query(Employee).filter(Employee.employee_id == employee_id).first()
-        )
+        employee = db.query(Employee).filter(Employee.id == employee_id).first()
         if not employee:
             return None
         return {"role": employee.role}
@@ -87,18 +82,16 @@ def get_employees_under_team_lead(db: Session, cycle_id: int, team_lead_id: int)
             db.query(Employee)
             .join(
                 EmployeeAllocation,
-                Employee.employee_id == EmployeeAllocation.employee_id,
+                Employee.id == EmployeeAllocation.employee_id,
             )
             .filter(
                 EmployeeAllocation.cycle_id == cycle_id,
-                Employee.reporting_manager == team_lead_id,
+                Employee.manager_id == team_lead_id,
             )
             .all()
         )
 
-        team_lead = (
-            db.query(Employee).filter(Employee.employee_id == team_lead_id).first()
-        )
+        team_lead = db.query(Employee).filter(Employee.id == team_lead_id).first()
 
         if team_lead and team_lead not in employees:
             employees.append(team_lead)
@@ -117,18 +110,18 @@ def get_all_employees_sorted(db: Session):
 
         result = (
             db.query(
-                Employee.employee_id,
-                Employee.employee_name,
+                Employee.id,
+                Employee.full_name,
                 Employee.role,
-                manager.employee_name.label("reporting_manager_name"),
-                prev_manager.employee_name.label("previous_reporting_manager_name"),
+                manager.full_name.label("reporting_manager_name"),
+                prev_manager.full_name.label("previous_reporting_manager_name"),
             )
-            .outerjoin(manager, Employee.reporting_manager == manager.employee_id)
+            .outerjoin(manager, Employee.manager_id == manager.id)
             .outerjoin(
                 prev_manager,
-                Employee.previous_reporting_manager == prev_manager.employee_id,
+                Employee.previous_manager_id == prev_manager.id,
             )
-            .order_by(Employee.employee_id)
+            .order_by(Employee.id)
             .all()
         )
 
@@ -140,5 +133,5 @@ def get_all_employees_sorted(db: Session):
 
 
 # To get employee by role id
-def get_employee_by_role_id(db: Session, role_id: str):
-    return db.query(Employee).filter(Employee.role_id == role_id).first()
+def get_employee_by_email(db: Session, email: str):
+    return db.query(Employee).filter(Employee.email == email).first()

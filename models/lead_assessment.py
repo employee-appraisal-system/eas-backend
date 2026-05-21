@@ -12,9 +12,7 @@ class LeadAssessmentRating(Base):
     cycle_id = Column(
         Integer, ForeignKey("appraisal_cycle.cycle_id", ondelete="CASCADE")
     )
-    employee_id = Column(
-        Integer, ForeignKey("employee.employee_id", ondelete="CASCADE")
-    )
+    employee_id = Column(Integer, ForeignKey("employee.id", ondelete="CASCADE"))
     parameter_id = Column(
         Integer, ForeignKey("parameters.parameter_id", ondelete="CASCADE")
     )
