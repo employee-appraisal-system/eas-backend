@@ -33,10 +33,8 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="Authorization code is missing")
 
-    # Step 1: Exchange code for tokens
     token_response = exchange_code_for_token(code)
 
-    # Step 2: Validate the ID token
     id_token = token_response.get("id_token")
     if not id_token:
         from fastapi import HTTPException
@@ -44,15 +42,13 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
 
     claims = validate_id_token(id_token)
 
-    # Step 3: Extract email from claims
     email = extract_email_from_claims(claims)
 
-    # Step 4: Find employee in DB by email (matched against role_id column)
     employee = get_employee_by_azure_email(db, email)
 
     return {
         "message": "Login successful",
-        "employee_id": employee.employee_id,
+        "employee_id": employee.id,
         "role": employee.role,
-        "employee_name": employee.employee_name,
+        "employee_name": employee.first_name,
     }

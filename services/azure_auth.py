@@ -78,10 +78,8 @@ def validate_id_token(id_token):
     """Validate the Azure ID token and return its claims."""
     try:
         jwks = get_azure_public_keys()
-        # Decode without verification first to get the kid (key id)
         unverified_header = jwt.get_unverified_header(id_token)
 
-        # Find the matching public key
         rsa_key = {}
         for key in jwks["keys"]:
             if key["kid"] == unverified_header["kid"]:
@@ -124,7 +122,6 @@ def validate_id_token(id_token):
 
 def extract_email_from_claims(claims):
     """Extract the user's email/UPN from token claims."""
-    # Try multiple claim fields Microsoft may use
     email = (
         claims.get("preferred_username")
         or claims.get("email")
@@ -140,11 +137,10 @@ def extract_email_from_claims(claims):
 
 
 def get_employee_by_azure_email(db: Session, email):
+    print("MICROSOFT LOGIN EMAIL:", email)
     """Look up employee in DB by matching Azure email against role_id column."""
     try:
-        # TEMPORARY: hardcoded for SSO testing - replace with real email lookup later
-        HARDCODED_EMAIL = "jprerana50@gmail.com"  # <-- put your Microsoft login email here
-        employee = db.query(Employee).filter(Employee.role_id == HARDCODED_EMAIL).first()
+        employee = db.query(Employee).filter(Employee.email == email).first()
         if not employee:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
