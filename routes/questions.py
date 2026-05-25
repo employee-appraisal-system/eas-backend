@@ -46,10 +46,6 @@ def list_question(db: Session = Depends(get_db)):
 def list_of_questions_with_options(db: Session = Depends(get_db)):
     try:
         questions = get_all_questions_with_option(db)
-        if not questions:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="No questions found"
-            )
         return questions
     except SQLAlchemyError as e:
         logging.error(f"Database error when fetching questions with options: {str(e)}")
