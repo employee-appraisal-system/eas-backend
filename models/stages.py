@@ -1,6 +1,6 @@
 from database.connection import Base
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean, text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship 
 
 
 class Stage(Base):
