@@ -1,36 +1,29 @@
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from dao.employee import get_employee_by_email
-from sqlalchemy.exc import SQLAlchemyError
-from fastapi import HTTPException, status
-from services.password_utils import verify_password
+
+from database.connection import get_db
+from services.login import authenticate_employee
+
+router = APIRouter(prefix="/login", tags=["Login"])
 
 
-def authenticate_employee(db: Session, email: str, password: str):
+@router.post("/")
+def login(payload: dict, db: Session = Depends(get_db)):
 
-    try:
+    email = payload.get("email")
+    password = payload.get("password")
 
-        employee = get_employee_by_email(db, email)
+    employee = authenticate_employee(db, email, password)
 
-        if not employee:
-            return None
-
-        if not verify_password(password, employee.password):
-            return None
-
-        return employee
-
-    except SQLAlchemyError as exception:
-        print(f"Database error occurred: {exception}")
-
+    if not employee:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database error occurred",
+            status_code=401,
+            detail="Invalid email or password"
         )
 
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred",
-        )
+    return {
+        "message": "Login successful",
+        "employee_id": employee.employee_id,
+        "employee_name": employee.employee_name,
+        "role": employee.role
+    }
