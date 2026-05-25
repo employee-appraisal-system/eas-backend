@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from database.connection import get_db
 from services.login import authenticate_employee
 
-router = APIRouter(prefix="/login", tags=["Login"])
+router = APIRouter(prefix="/auth/login", tags=["Login"])
 
 
 @router.post("/")
@@ -12,7 +12,6 @@ def login(payload: dict, db: Session = Depends(get_db)):
 
     email = payload.get("email")
     password = payload.get("password")
-
     employee = authenticate_employee(db, email, password)
 
     if not employee:
@@ -23,7 +22,7 @@ def login(payload: dict, db: Session = Depends(get_db)):
 
     return {
         "message": "Login successful",
-        "employee_id": employee.employee_id,
-        "employee_name": employee.employee_name,
+        "employee_id": employee.id,
+        "employee_name": employee.first_name,
         "role": employee.role
     }
