@@ -33,10 +33,6 @@ def fetch_employee_cycles(employee_id: int, db: Session = Depends(get_db)):
     """
     try:
         cycles = get_employee_cycles(db, employee_id)
-        if not cycles:
-            raise HTTPException(
-                status_code=404, detail="No appraisal cycles found for employee."
-            )
         return cycles
     except SQLAlchemyError:
         raise HTTPException(

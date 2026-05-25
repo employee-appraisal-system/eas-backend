@@ -7,3 +7,4 @@ from .parameters import Parameter
 from .questions import Question
 from .stages import Stage
 from .self_assessment_response import SelfAssessmentResponse
+from .rating import Rating
