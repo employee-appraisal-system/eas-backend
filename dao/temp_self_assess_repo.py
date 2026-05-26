@@ -78,8 +78,8 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
         # Convert to list of dictionaries
         response = [
             {
-                "employee_id": row.employee_id,
-                "employee_name": row.employee_name,
+                "employee_id": row.id,
+                "employee_name": row.full_name,
                 "question_text": row.question_text,
                 "response_text": row.response_text,
             }
