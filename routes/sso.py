@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from database.connection import get_db
 from services.azure_auth import (
@@ -31,6 +30,7 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
     code = payload.get("code")
     if not code:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=400, detail="Authorization code is missing")
 
     token_response = exchange_code_for_token(code)
@@ -38,6 +38,7 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
     id_token = token_response.get("id_token")
     if not id_token:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=400, detail="ID token not received from Azure")
 
     claims = validate_id_token(id_token)

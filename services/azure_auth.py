@@ -1,5 +1,4 @@
-import os
-import httpx
+import os, httpx
 from jose import jwt, JWTError
 from dotenv import load_dotenv
 from fastapi import HTTPException, status
@@ -52,12 +51,12 @@ def exchange_code_for_token(code):
     except httpx.HTTPStatusError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Azure token exchange failed: {e.response.text}"
+            detail=f"Azure token exchange failed: {e.response.text}",
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to exchange code for token: {str(e)}"
+            detail=f"Failed to exchange code for token: {str(e)}",
         )
 
 
@@ -70,7 +69,7 @@ def get_azure_public_keys():
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch Azure public keys: {str(e)}"
+            detail=f"Failed to fetch Azure public keys: {str(e)}",
         )
 
 
@@ -95,7 +94,7 @@ def validate_id_token(id_token):
         if not rsa_key:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Unable to find matching public key"
+                detail="Unable to find matching public key",
             )
 
         payload = jwt.decode(
@@ -108,15 +107,14 @@ def validate_id_token(id_token):
 
     except JWTError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token: {str(e)}"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid token: {str(e)}"
         )
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Token validation failed: {str(e)}"
+            detail=f"Token validation failed: {str(e)}",
         )
 
 
@@ -131,7 +129,7 @@ def extract_email_from_claims(claims):
     if not email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Could not extract email from Azure token"
+            detail="Could not extract email from Azure token",
         )
     return email
 
@@ -144,7 +142,7 @@ def get_employee_by_azure_email(db: Session, email):
         if not employee:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"No employee found with email: {email}. Contact your administrator."
+                detail=f"No employee found with email: {email}. Contact your administrator.",
             )
         return employee
     except HTTPException:
@@ -152,5 +150,5 @@ def get_employee_by_azure_email(db: Session, email):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Database error while looking up employee: {str(e)}"
+            detail=f"Database error while looking up employee: {str(e)}",
         )

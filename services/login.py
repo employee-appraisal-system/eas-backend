@@ -9,7 +9,6 @@ def authenticate_employee(db: Session, email: str, password: str):
 
     try:
         employee = get_employee_by_email(db, email)
-        
 
         if not employee:
             return None

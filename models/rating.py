@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String
 from database.connection import Base
-from sqlalchemy.orm import column_property
+
 
 class Rating(Base):
     __tablename__ = "rating"
