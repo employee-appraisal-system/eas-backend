@@ -13,9 +13,13 @@ from typing import List
 from models.employee_allocation import EmployeeAllocation
 from logger_config import logging
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from services.auth_middleware import get_current_user
 
-router = APIRouter(prefix="/assignments", tags=["Assignments"])
-
+router = APIRouter(
+    prefix="/assignment",
+    tags=["Assignment"],
+    dependencies=[Depends(get_current_user)]
+)
 
 @router.post("/", response_model=List[AssignmentResponse])
 def assign_questions(assignment_data: AssignmentCreate, db: Session = Depends(get_db)):

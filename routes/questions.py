@@ -14,8 +14,14 @@ from dao.questions import (
 import logging
 from logger_config import logging
 
-router = APIRouter(tags=["Questions"])
+from services.auth_middleware import get_current_user
+from fastapi import Depends
 
+router = APIRouter(
+    prefix="/question",
+    tags=["Question"],
+    dependencies=[Depends(get_current_user)]
+)
 
 # Fetch all questions
 @router.get("/question", response_model=List[QuestionsSchema])

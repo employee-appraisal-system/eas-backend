@@ -13,29 +13,37 @@ from services.employee import (
 )
 from schema.employee import EmployeeResponse, EmployeeRoleResponse
 from models.employee import Employee
+from services.auth_middleware import get_current_user
 
-router = APIRouter()
-
+router = APIRouter(
+    prefix="/employee",
+    tags=["Employee"],
+    dependencies=[Depends(get_current_user)]
+)
 
 # Get all employees
 @router.get("/")
-def read_employees_list(db: Session = Depends(get_db)):
+def read_employees_list(
+    db: Session = Depends(get_db)
+):
     """
-    Fetch all employees
-    Args:
-        db: Database session
-        Returns:
-                List of EmployeeResponse objects
+    Fetch all employees (Protected Route)
     """
+
     try:
         return get_all_employees(db)
+
     except SQLAlchemyError:
         raise HTTPException(
-            status_code=500, detail="Database error occurred while fetching employees."
+            status_code=500,
+            detail="Database error occurred while fetching employees."
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 # Get employees under a specific manager
 
