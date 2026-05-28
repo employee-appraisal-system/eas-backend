@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session, aliased
 from sqlalchemy.exc import SQLAlchemyError
-from typing import Optional, List
 from models.employee import Employee
 from models.employee_allocation import EmployeeAllocation
 

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, literal
+from sqlalchemy import func, literal
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import SQLAlchemyError, DataError
 from models.self_assessment_response import SelfAssessmentResponse

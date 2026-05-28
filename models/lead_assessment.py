@@ -3,18 +3,19 @@ from database.connection import Base
 
 
 class LeadAssessmentRating(Base):
-    __tablename__ = "lead_assessment_rating"
+    __tablename__ = "appraisal_lead_assessment_rating"
 
     lead_rating_id = Column(Integer, primary_key=True, index=True)
     allocation_id = Column(
-        Integer, ForeignKey("employee_allocation.allocation_id", ondelete="CASCADE")
+        Integer,
+        ForeignKey("appraisal_cycle_allocation.allocation_id", ondelete="CASCADE"),
     )
     cycle_id = Column(
         Integer, ForeignKey("appraisal_cycle.cycle_id", ondelete="CASCADE")
     )
     employee_id = Column(Integer, ForeignKey("employee.id", ondelete="CASCADE"))
     parameter_id = Column(
-        Integer, ForeignKey("parameters.parameter_id", ondelete="CASCADE")
+        Integer, ForeignKey("appraisal_parameter.parameter_id", ondelete="CASCADE")
     )
     parameter_rating = Column(Integer, nullable=False)
     specific_input = Column(Text, nullable=True)

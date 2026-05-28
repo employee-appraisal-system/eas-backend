@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 
 
 class EmployeeAllocation(Base):
-    __tablename__ = "employee_allocation"
+    __tablename__ = "appraisal_cycle_allocation"
 
     allocation_id = Column(Integer, primary_key=True, autoincrement=True)
     cycle_id = Column(

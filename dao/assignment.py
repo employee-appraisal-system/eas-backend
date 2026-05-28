@@ -1,11 +1,8 @@
 from sqlalchemy.orm import Session
 from models.assignment import QuestionAssignment
 from models.questions import Question
-from models.employee import Employee
-from models.appraisal_cycle import AppraisalCycle
-from schema.assignment import AssignmentCreate, AssignmentResponse
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from typing import List, Optional
+from sqlalchemy.exc import SQLAlchemyError
+from typing import List
 
 
 def assign_questions_to_employee(

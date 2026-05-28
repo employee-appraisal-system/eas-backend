@@ -6,16 +6,17 @@ from services.password_utils import verify_password
 
 
 def authenticate_employee(db: Session, email: str, password: str):
-
+    print("ya")
     try:
         employee = get_employee_by_email(db, email)
 
+        print(employee)
         if not employee:
             return None
 
         if not verify_password(password, employee.password):
             return None
-
+        print("ja")
         return employee
 
     except SQLAlchemyError as exception:

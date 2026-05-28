@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 
 
 class Parameter(Base):
-    __tablename__ = "parameters"
+    __tablename__ = "appraisal_parameter"
 
     parameter_id = Column(Integer, primary_key=True, autoincrement=True)
     parameter_title = Column(String(255), nullable=False)

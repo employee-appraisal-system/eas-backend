@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from models.stages import Stage
-from models.appraisal_cycle import AppraisalCycle
 from dao.appraisal_cycle import get_cycle_by_id
 from schema.stage import StageCreate
 from fastapi import HTTPException

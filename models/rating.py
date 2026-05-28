@@ -3,7 +3,7 @@ from database.connection import Base
 
 
 class Rating(Base):
-    __tablename__ = "rating"
+    __tablename__ = "appraisal_rating"
 
     id = Column(Integer, primary_key=True)
     rating = Column(Integer, default=None)

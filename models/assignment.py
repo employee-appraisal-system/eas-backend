@@ -4,14 +4,16 @@ from sqlalchemy.orm import relationship
 
 
 class QuestionAssignment(Base):
-    __tablename__ = "assigned_questions"
+    __tablename__ = "appraisal_question_assignment"
 
     assignment_id = Column(Integer, primary_key=True, autoincrement=True)
     employee_id = Column(
         Integer, ForeignKey("employee.id", ondelete="CASCADE"), nullable=False
     )
     question_id = Column(
-        Integer, ForeignKey("question.question_id", ondelete="CASCADE"), nullable=False
+        Integer,
+        ForeignKey("appraisal_question.question_id", ondelete="CASCADE"),
+        nullable=False,
     )
     cycle_id = Column(
         Integer,

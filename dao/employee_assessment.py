@@ -3,7 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException
 from models.employee_allocation import EmployeeAllocation
 from models.assignment import QuestionAssignment
-from models.questions import Question, Option
+from models.questions import Question
 from models.self_assessment_response import SelfAssessmentResponse
 from models.appraisal_cycle import AppraisalCycle
 from models.stages import Stage

@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 
 
 class Stage(Base):
-    __tablename__ = "stages"
+    __tablename__ = "appraisal_stage"
 
     stage_id = Column(Integer, primary_key=True, autoincrement=True)
     stage_name = Column(String(50), nullable=False)
