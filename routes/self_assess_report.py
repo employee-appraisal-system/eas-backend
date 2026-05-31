@@ -8,7 +8,9 @@ from models.appraisal_cycle import AppraisalCycle
 from logger_config import logging
 from typing import List, Dict
 
-router = APIRouter(tags=["Self Assessment Report"])
+router = APIRouter(
+    prefix="/self_assess_report",
+    tags=["Self Assessment Report"])
 
 
 # Fetch self-assessment report for a specific cycle

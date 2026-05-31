@@ -11,7 +11,10 @@ from models.edit_appraisal_cycle import CycleUpdate
 
 from logger_config import logging
 
-router = APIRouter(tags=["Edit Appraisal Cycle"])
+router = APIRouter(
+    prefix="/edit-appraisal-cycle",
+    tags=["Edit Appraisal Cycle"],
+    )
 
 
 @router.get("/edit-appraisal-cycle/{cycle_id}")

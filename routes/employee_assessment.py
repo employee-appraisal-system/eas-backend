@@ -16,8 +16,10 @@ from services.employee_assessment import (
     get_readonly_responses,
 )
 from dao.employee_assessment import get_team_lead_cycles
+from services.auth_middleware import get_current_user
 
-router = APIRouter(prefix="/assessment", tags=["Self Assessment"])
+router = APIRouter(prefix="/employee_assessment", tags=["Self Assessment"], dependencies=[Depends(get_current_user)]
+)
 
 
 # Fetch the active and completed cycles for which employee is allocated

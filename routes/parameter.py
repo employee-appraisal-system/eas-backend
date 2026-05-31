@@ -12,8 +12,13 @@ from dao.parameter import get_parameters_for_cycle
 from dao.employee import get_employee_by_id
 from typing import List
 
-router = APIRouter(prefix="/parameters", tags=["Parameters"])
+from services.auth_middleware import get_current_user
 
+router = APIRouter(
+    prefix="/parameter",
+    tags=["Parameter"],
+    dependencies=[Depends(get_current_user)]
+)
 
 # Fetch all parameters
 @router.get("/", response_model=List[ParameterResponse])

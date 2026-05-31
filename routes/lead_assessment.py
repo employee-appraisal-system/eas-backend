@@ -12,9 +12,10 @@ from services.lead_assessment import (
 from models.lead_assessment import LeadAssessmentRating
 from models.appraisal_cycle import AppraisalCycle
 from database.connection import get_db
+from services.auth_middleware import get_current_user
 
-router = APIRouter(prefix="/lead_assessment", tags=["Lead Assessment"])
 
+router = APIRouter(prefix="/lead_assessment", tags=["Lead Assessment"],dependencies=[Depends(get_current_user)])
 
 # Save lead assessment ratings
 @router.post("/save_rating")
