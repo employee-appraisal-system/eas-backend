@@ -135,7 +135,6 @@ def extract_email_from_claims(claims):
 
 
 def get_employee_by_azure_email(db: Session, email):
-    print("MICROSOFT LOGIN EMAIL:", email)
     """Look up employee in DB by matching Azure email against role_id column."""
     try:
         employee = db.query(Employee).filter(Employee.email == email).first()
