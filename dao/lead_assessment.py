@@ -90,10 +90,6 @@ def save_lead_assessment_rating(
         stage_end_date = lead_assessment_stage.end_date_of_stage
         stage_start_date = lead_assessment_stage.start_date_of_stage
 
-        # Debug
-        # print(f"Discussion date: {parsed_discussion_date}, type: {type(parsed_discussion_date)}")
-        # print(f"Stage end date: {stage_end_date}, type: {type(stage_end_date)}")
-
         if not (stage_start_date <= parsed_discussion_date <= stage_end_date):
 
             # If the discussion date is not within the stage dates, raise an error
@@ -101,7 +97,6 @@ def save_lead_assessment_rating(
             formatted_end_date = stage_end_date.strftime("%d-%m-%Y")
             formatted_start_date = stage_start_date.strftime("%d-%m-%Y")
             error_msg = f"Discussion date ({formatted_discussion}) must be within the Lead Assessment stage start date ({formatted_start_date}) and end date ({formatted_end_date})."
-            print(f"ERROR: {error_msg}")
             db.rollback()
             raise ValueError(error_msg)
 

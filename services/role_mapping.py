@@ -40,26 +40,27 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+
 def _parse_role_list(env_key: str) -> list[str]:
     """Return a normalised list of Entra role names from a comma-separated env var."""
-    raw = os.getenv(env_key, "")    
+    raw = os.getenv(env_key, "")
     return [r.strip() for r in raw.split(",") if r.strip()]
 
 
 ROLE_PRIORITY: list[tuple[str, list[str]]] = [
-    ("HR",       _parse_role_list("ROLE_MAP_HR")),
-    ("Lead",     _parse_role_list("ROLE_MAP_LEAD")),
+    ("HR", _parse_role_list("ROLE_MAP_HR")),
+    ("Lead", _parse_role_list("ROLE_MAP_LEAD")),
     ("Employee", _parse_role_list("ROLE_MAP_EMPLOYEE")),
 ]
 
 DEFAULT_APP_ROLE: str = os.getenv("ROLE_MAP_DEFAULT", "Employee")
 
 
-CLIENT_ID     = os.getenv("AZURE_CLIENT_ID")
+CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
 CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET")
 
 
-_raw_tenant   = os.getenv("AZURE_TENANT_ID", "common")
+_raw_tenant = os.getenv("AZURE_TENANT_ID", "common")
 GRAPH_TENANT_ID = os.getenv("AZURE_GRAPH_TENANT_ID") or (
     _raw_tenant if _raw_tenant.lower() != "common" else None
 )
@@ -77,7 +78,8 @@ GRAPH_TOKEN_URL = (
     if GRAPH_TENANT_ID
     else None
 )
-GRAPH_BASE_URL  = "https://graph.microsoft.com/v1.0"
+GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0"
+
 
 def map_entra_roles_to_app_role(entra_role_names: list[str]) -> str:
     """
@@ -104,7 +106,6 @@ def map_entra_roles_to_app_role(entra_role_names: list[str]) -> str:
     return DEFAULT_APP_ROLE
 
 
-
 def resolve_role_from_token_claims(claims: dict) -> str:
     """
     During an SSO login the Azure ID/access token may contain:
@@ -129,7 +130,6 @@ def resolve_role_from_token_claims(claims: dict) -> str:
     return map_entra_roles_to_app_role(role_values)
 
 
-
 def _get_graph_app_token() -> str:
     """Obtain a client-credentials token for the Microsoft Graph API."""
     if not GRAPH_TOKEN_URL:
@@ -144,10 +144,10 @@ def _get_graph_app_token() -> str:
         resp = httpx.post(
             GRAPH_TOKEN_URL,
             data={
-                "grant_type":    "client_credentials",
-                "client_id":     CLIENT_ID,
+                "grant_type": "client_credentials",
+                "client_id": CLIENT_ID,
                 "client_secret": CLIENT_SECRET,
-                "scope":         "https://graph.microsoft.com/.default",
+                "scope": "https://graph.microsoft.com/.default",
             },
             timeout=10,
         )
@@ -181,24 +181,38 @@ def get_entra_roles_for_user(email: str) -> list[str]:
     try:
         token = _get_graph_app_token()
         headers = {"Authorization": f"Bearer {token}"}
-
-        url = (
-            f"{GRAPH_BASE_URL}/users/{email}/memberOf"
-            "?$select=displayName,@odata.type"
+        
+        # 1) Find the user by mail, otherMails, or UPN
+        search_url = (
+            f"{GRAPH_BASE_URL}/users?$filter=mail eq '{email}' or "
+            f"otherMails/any(id:id eq '{email}') or userPrincipalName eq '{email}'"
+            "&$count=true&$select=id"
         )
+        search_headers = {**headers, "ConsistencyLevel": "eventual"}
+        search_resp = httpx.get(search_url, headers=search_headers, timeout=10)
+        search_resp.raise_for_status()
+        search_data = search_resp.json()
+        
+        if not search_data.get("value"):
+            logger.warning("Graph API: user '%s' not found in Entra ID.", email)
+            return []
+            
+        user_id = search_data["value"][0]["id"]
+
+        # 2) Get their group/role memberships using their actual object ID
+        url = f"{GRAPH_BASE_URL}/users/{user_id}/memberOf"
         resp = httpx.get(url, headers=headers, timeout=10)
 
+        # 404 won't normally happen now since we just verified the user ID, but keep the check
         if resp.status_code == 404:
-            logger.warning("Graph API: user '%s' not found in Entra ID.", email)
+            logger.warning("Graph API: user ID '%s' not found for memberOf.", user_id)
             return []
 
         resp.raise_for_status()
         members = resp.json().get("value", [])
 
         display_names = [
-            m.get("displayName", "")
-            for m in members
-            if m.get("displayName")
+            m.get("displayName", "") for m in members if m.get("displayName")
         ]
         logger.debug("Graph API roles for %s: %s", email, display_names)
         return display_names
@@ -208,7 +222,8 @@ def get_entra_roles_for_user(email: str) -> list[str]:
     except Exception as exc:
         logger.warning(
             "Graph API lookup failed for '%s' (non-fatal, defaulting role): %s",
-            email, exc,
+            email,
+            exc,
         )
         return []
 
