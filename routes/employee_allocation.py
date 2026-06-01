@@ -4,10 +4,14 @@ from sqlalchemy.exc import SQLAlchemyError
 from database.connection import get_db
 from models.employee_allocation import EmployeeAllocation
 from typing import List
-from services.auth_middleware import get_current_user
+from services.auth_middleware import get_current_user, require_roles
 
-router = APIRouter(prefix="/employee-allocation", tags=["Employee Allocation"],    dependencies=[Depends(get_current_user)]
+router = APIRouter(
+    prefix="/employee-allocation",
+    tags=["Employee Allocation"],
+    dependencies=[Depends(get_current_user), Depends(require_roles("hr", "admin"))],
 )
+
 
 # get all employees allocated to a specific cycle
 @router.get("/{cycle_id}", response_model=List[int])

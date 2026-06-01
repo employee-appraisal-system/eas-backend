@@ -12,14 +12,29 @@ from services.lead_assessment import (
 from models.lead_assessment import LeadAssessmentRating
 from models.appraisal_cycle import AppraisalCycle
 from database.connection import get_db
-from services.auth_middleware import get_current_user
+from services.auth_middleware import (
+    get_current_user,
+    normalize_role,
+    require_roles,
+)
 
+from dao.employee import get_employees_under_team_lead
 
-router = APIRouter(prefix="/lead_assessment", tags=["Lead Assessment"],dependencies=[Depends(get_current_user)])
+router = APIRouter(
+    prefix="/lead_assessment",
+    tags=["Lead Assessment"],
+    dependencies=[Depends(get_current_user)],
+)
+
 
 # Save lead assessment ratings
 @router.post("/save_rating")
-def save_rating(request: LeadAssessmentRatingRequest, db: Session = Depends(get_db)):
+def save_rating(
+    request: LeadAssessmentRatingRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+    _role_user: dict = Depends(require_roles("team lead", "hr", "admin")),
+):
     """
     Save lead assessment ratings.
     Args:
@@ -28,6 +43,27 @@ def save_rating(request: LeadAssessmentRatingRequest, db: Session = Depends(get_
     Returns:
         Result of the save operation"""
     try:
+        user_role = normalize_role(user.get("role"))
+        is_privileged = user_role in {normalize_role("hr"), normalize_role("admin")}
+
+        if not is_privileged:
+            token_employee_id = user.get("employee_id")
+            if token_employee_id is None:
+                raise HTTPException(status_code=401, detail="Invalid token")
+
+            if str(request.employee_id) == str(token_employee_id):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Forbidden",
+                )
+
+            allowed_employees = get_employees_under_team_lead(
+                db, request.cycle_id, int(token_employee_id)
+            )
+            allowed_employee_ids = {e.id for e in allowed_employees}
+            if request.employee_id not in allowed_employee_ids:
+                raise HTTPException(status_code=403, detail="Forbidden")
+
         # Check if the cycle is active
         cycle = (
             db.query(AppraisalCycle)
@@ -76,7 +112,11 @@ def save_rating(request: LeadAssessmentRatingRequest, db: Session = Depends(get_
 # Fetch previous ratings for a given employee and cycle
 @router.get("/lead_assessment/previous_data/{cycle_id}/{employee_id}")
 def get_previous_ratings(
-    cycle_id: int, employee_id: int, db: Session = Depends(get_db)
+    cycle_id: int,
+    employee_id: int,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+    _role_user: dict = Depends(require_roles("team lead", "hr", "admin")),
 ):
     """
     Fetch previous ratings for a given employee and cycle.
@@ -87,6 +127,21 @@ def get_previous_ratings(
     Returns:
         Dictionary containing cycle status, ratings, and discussion date"""
     try:
+        user_role = normalize_role(user.get("role"))
+        is_privileged = user_role in {normalize_role("hr"), normalize_role("admin")}
+
+        if not is_privileged:
+            token_employee_id = user.get("employee_id")
+            if token_employee_id is None:
+                raise HTTPException(status_code=401, detail="Invalid token")
+
+            allowed_employees = get_employees_under_team_lead(
+                db, cycle_id, int(token_employee_id)
+            )
+            allowed_employee_ids = {e.id for e in allowed_employees}
+            if employee_id not in allowed_employee_ids:
+                raise HTTPException(status_code=403, detail="Forbidden")
+
         # Fetch cycle status
         cycle = (
             db.query(AppraisalCycle).filter(AppraisalCycle.cycle_id == cycle_id).first()
@@ -133,7 +188,11 @@ def get_previous_ratings(
 @router.get(
     "/employees_ratings/{cycle_id}", response_model=list[LeadAssessmentRatingResponse]
 )
-def get_employee_ratings(cycle_id: int, db: Session = Depends(get_db)):
+def get_employee_ratings(
+    cycle_id: int,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     """
     Get list of employee_id and "overall performance rating" for a selected cycle.
     Args:

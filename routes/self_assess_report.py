@@ -8,9 +8,13 @@ from models.appraisal_cycle import AppraisalCycle
 from logger_config import logging
 from typing import List, Dict
 
+from services.auth_middleware import get_current_user, require_roles
+
 router = APIRouter(
     prefix="/self_assess_report",
-    tags=["Self Assessment Report"])
+    tags=["Self Assessment Report"],
+    dependencies=[Depends(get_current_user), Depends(require_roles("hr", "admin"))],
+)
 
 
 # Fetch self-assessment report for a specific cycle

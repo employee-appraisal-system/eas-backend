@@ -17,15 +17,16 @@ from schema.appraisal_cycle_pydantic import (
     AppraisalCycleResponseWithStages,
 )
 from database.connection import get_db
-from services.auth_middleware import get_current_user
+from services.auth_middleware import get_current_user, require_roles
 
 # from models.appraisal_cycle import AppraisalCycle
 
 router = APIRouter(
     prefix="/appraisal_cycle",
     tags=["Appraisal"],
-    dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(get_current_user), Depends(require_roles("hr", "admin"))],
 )
+
 
 # Create a new cycle
 @router.post("/", response_model=AppraisalCycleResponse)

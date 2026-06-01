@@ -13,16 +13,23 @@ from typing import List
 from models.employee_allocation import EmployeeAllocation
 from logger_config import logging
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from services.auth_middleware import get_current_user
-
-router = APIRouter(
-    prefix="/assignment",
-    tags=["Assignment"],
-    dependencies=[Depends(get_current_user)]
+from services.auth_middleware import (
+    get_current_user,
+    require_roles,
+    require_self_or_roles,
 )
 
+router = APIRouter(
+    prefix="/assignment", tags=["Assignment"], dependencies=[Depends(get_current_user)]
+)
+
+
 @router.post("/", response_model=List[AssignmentResponse])
-def assign_questions(assignment_data: AssignmentCreate, db: Session = Depends(get_db)):
+def assign_questions(
+    assignment_data: AssignmentCreate,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     """
     Create question assignments for employees
 
@@ -48,7 +55,11 @@ def assign_questions(assignment_data: AssignmentCreate, db: Session = Depends(ge
 
 
 @router.get("/{employee_id}", response_model=List[AssignmentResponse])
-def get_assignments(employee_id: int, db: Session = Depends(get_db)):
+def get_assignments(
+    employee_id: int,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+):
     """
     Retrieve assignments for a specific employee
 
@@ -81,7 +92,10 @@ def get_assignments(employee_id: int, db: Session = Depends(get_db)):
 
 @router.get("/{employee_id}/{cycle_id}")
 def get_assigned_questions(
-    employee_id: int, cycle_id: int, db: Session = Depends(get_db)
+    employee_id: int,
+    cycle_id: int,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
 ):
     """
     Retrieve questions assigned to an employee for a specific cycle

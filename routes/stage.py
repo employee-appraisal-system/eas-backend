@@ -12,12 +12,21 @@ from typing import List
 from models import Stage
 from models import AppraisalCycle
 
-router = APIRouter(prefix="/stages", tags=["Stages"])
+from services.auth_middleware import get_current_user, require_roles
+
+router = APIRouter(
+    prefix="/stages",
+    tags=["Stages"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 # Fetch all stages
 @router.get("/", response_model=List[StageResponse])
-def get_stages(db: Session = Depends(get_db)):
+def get_stages(
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     try:
         stages = fetch_all_stages(db)
         if not stages:
@@ -37,7 +46,11 @@ def get_stages(db: Session = Depends(get_db)):
 
 # Add a new stage with validation and proper exception handling
 @router.post("/", response_model=StageResponse)
-def create_new_stage(stage_data: StageCreate, db: Session = Depends(get_db)):
+def create_new_stage(
+    stage_data: StageCreate,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     try:
         return add_new_stage(db, stage_data)
     except Exception as exception:

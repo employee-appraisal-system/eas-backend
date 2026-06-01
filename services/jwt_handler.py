@@ -31,8 +31,7 @@ def verify_access_token(token: str):
 
         if employee_id is None:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
             )
 
         return payload
@@ -40,5 +39,5 @@ def verify_access_token(token: str):
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token is invalid or expired"
+            detail="Token is invalid or expired",
         )

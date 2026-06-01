@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database.connection import get_db
+from services.jwt_handler import create_access_token
 from services.azure_auth import (
     get_login_url,
     exchange_code_for_token,
@@ -47,9 +48,18 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
 
     employee = get_employee_by_azure_email(db, email)
 
+    access_token = create_access_token(
+        {"employee_id": employee.id, "email": employee.email, "role": employee.role}
+    )
+
     return {
         "message": "Login successful",
-        "employee_id": employee.id,
-        "role": employee.role,
-        "employee_name": employee.first_name,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "employee": {
+            "employee_id": employee.id,
+            "employee_name": employee.first_name,
+            "role": employee.role,
+        },
+        "email": employee.email,
     }

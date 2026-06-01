@@ -11,10 +11,13 @@ from models.edit_appraisal_cycle import CycleUpdate
 
 from logger_config import logging
 
+from services.auth_middleware import get_current_user, require_roles
+
 router = APIRouter(
     prefix="/edit-appraisal-cycle",
     tags=["Edit Appraisal Cycle"],
-    )
+    dependencies=[Depends(get_current_user), Depends(require_roles("hr", "admin"))],
+)
 
 
 @router.get("/edit-appraisal-cycle/{cycle_id}")
