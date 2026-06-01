@@ -16,15 +16,27 @@ from services.employee_assessment import (
     get_readonly_responses,
 )
 from dao.employee_assessment import get_team_lead_cycles
-from services.auth_middleware import get_current_user
+from services.auth_middleware import (
+    get_current_user,
+    normalize_role,
+    require_roles,
+    require_self_or_roles,
+)
 
-router = APIRouter(prefix="/employee_assessment", tags=["Self Assessment"], dependencies=[Depends(get_current_user)]
+router = APIRouter(
+    prefix="/employee_assessment",
+    tags=["Self Assessment"],
+    dependencies=[Depends(get_current_user)],
 )
 
 
 # Fetch the active and completed cycles for which employee is allocated
 @router.get("/cycles/{employee_id}")
-def fetch_employee_cycles(employee_id: int, db: Session = Depends(get_db)):
+def fetch_employee_cycles(
+    employee_id: int,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+):
     """
     Fetch the active and completed cycles for which employee is allocated.
     Args:
@@ -46,7 +58,12 @@ def fetch_employee_cycles(employee_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/teamlead/cycles/{team_lead_id}")
-def fetch_team_lead_cycles(team_lead_id: int, db: Session = Depends(get_db)):
+def fetch_team_lead_cycles(
+    team_lead_id: int,
+    db: Session = Depends(get_db),
+    _role_user: dict = Depends(require_roles("team lead", "hr", "admin")),
+    _scope_user: dict = Depends(require_self_or_roles("team_lead_id", "hr", "admin")),
+):
     cycles = get_team_lead_cycles(db, team_lead_id)
     if not cycles:
         raise HTTPException(
@@ -57,7 +74,12 @@ def fetch_team_lead_cycles(team_lead_id: int, db: Session = Depends(get_db)):
 
 # Fetch questions assigned to the employee for active and completed cycles
 @router.get("/questions/{employee_id}/{cycle_id}", response_model=List[QuestionOut])
-def fetch_questions(employee_id: int, cycle_id: int, db: Session = Depends(get_db)):
+def fetch_questions(
+    employee_id: int,
+    cycle_id: int,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+):
     try:
         questions = get_questions_for_cycle(db, employee_id, cycle_id)
         if not questions:
@@ -74,11 +96,25 @@ def fetch_questions(employee_id: int, cycle_id: int, db: Session = Depends(get_d
 # Add response and submit
 @router.post("/submit", response_model=dict)
 def submit_assessment(
-    responses: List[AssessmentResponseIn], db: Session = Depends(get_db)
+    responses: List[AssessmentResponseIn],
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
 ):
     try:
         if not responses:
             raise HTTPException(status_code=400, detail="No responses submitted.")
+
+        token_employee_id = user.get("employee_id")
+        if token_employee_id is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        user_role = normalize_role(user.get("role"))
+        is_privileged = user_role in {normalize_role("hr"), normalize_role("admin")}
+
+        if not is_privileged:
+            if any(str(r.employee_id) != str(token_employee_id) for r in responses):
+                raise HTTPException(status_code=403, detail="Forbidden")
+
         return save_self_assessment_responses(db, responses)
     except SQLAlchemyError:
         raise HTTPException(
@@ -93,7 +129,12 @@ def submit_assessment(
 @router.get(
     "/responses/{employee_id}/{cycle_id}", response_model=List[AssessmentResponseOut]
 )
-def view_responses(employee_id: int, cycle_id: int, db: Session = Depends(get_db)):
+def view_responses(
+    employee_id: int,
+    cycle_id: int,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+):
     responses = get_readonly_responses(db, employee_id, cycle_id)
     if not responses:
         raise HTTPException(status_code=404, detail="No responses found.")
