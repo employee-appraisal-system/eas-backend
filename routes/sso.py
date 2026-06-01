@@ -56,8 +56,10 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
         "message": "Login successful",
         "access_token": access_token,
         "token_type": "bearer",
-        "employee_id": employee.id,
-        "role": employee.role,
-        "employee_name": employee.first_name,
+        "employee": {
+            "employee_id": employee.id,
+            "employee_name": employee.first_name,
+            "role": employee.role,
+        },
         "email": employee.email,
     }
