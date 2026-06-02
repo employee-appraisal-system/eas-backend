@@ -6,6 +6,13 @@ class OptionSchema(BaseModel):
     option_text: str
 
 
+class OptionResponseSchema(OptionSchema):
+    option_id: int
+
+    class Config:
+        from_attributes = True
+
+
 class QuestionSchema(BaseModel):
     question_type: str
     question_text: str
@@ -17,10 +24,10 @@ class QuestionSchema(BaseModel):
 
 class QuestionResponseSchema(QuestionSchema):
     question_id: int
-    options: List[OptionSchema]
+    options: List[OptionResponseSchema]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class QuestionsSchema(BaseModel):
@@ -28,4 +35,4 @@ class QuestionsSchema(BaseModel):
     question_text: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -28,15 +28,15 @@ def get_active_cycle(cycle_id: int, db: Session = Depends(get_db)):
         cycle = (
             db.query(AppraisalCycle).filter(AppraisalCycle.cycle_id == cycle_id).first()
         )
-        if not cycle:
-            logging.warning(
-                f"Attempt to retrieve self-assessment report for non-existent cycle {cycle_id}"
-            )
-            raise HTTPException(
-                status_code=404, detail=f"Appraisal cycle with ID {cycle_id} not found"
-            )
+        # if not cycle:
+        #     logging.warning(
+        #         f"Attempt to retrieve self-assessment report for non-existent cycle {cycle_id}"
+        #     )
+        #     raise HTTPException(
+        #         status_code=404, detail=f"Appraisal cycle with ID {cycle_id} not found"
+        #     )
 
-        logging.info(f"Fetching self-assessment report for cycle {cycle_id}")
+        # logging.info(f"Fetching self-assessment report for cycle {cycle_id}")
 
         responses = get_response(db, cycle_id)
 

@@ -77,7 +77,7 @@ def get_reporting_employees(
 def get_reporting_manager(
     employee_id: int,
     db: Session = Depends(get_db),
-    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin", "team lead")),
 ):
     """
     fetch the reporting manager for a given employee
@@ -108,7 +108,7 @@ def get_reporting_manager(
 def get_employee(
     employee_id: int,
     db: Session = Depends(get_db),
-    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin", "team lead")),
 ):
     try:
         employee, error = fetch_employee_details(db, employee_id)

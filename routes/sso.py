@@ -65,6 +65,10 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
     # -----------------------------------------------------------------
     entra_roles = get_entra_roles_for_user(email)
     app_role = map_entra_roles_to_app_role(entra_roles)
+    
+    # Fallback to DB role if Entra ID returns the default 'Employee' role, to allow local testing
+    if app_role.lower() == "employee" and employee.role:
+        app_role = employee.role
 
     access_token = create_access_token(
         {"employee_id": employee.id, "email": employee.email, "role": app_role}

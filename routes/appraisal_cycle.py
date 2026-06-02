@@ -24,13 +24,17 @@ from services.auth_middleware import get_current_user, require_roles
 router = APIRouter(
     prefix="/appraisal_cycle",
     tags=["Appraisal"],
-    dependencies=[Depends(get_current_user), Depends(require_roles("hr", "admin"))],
+    dependencies=[Depends(get_current_user)],
 )
 
 
 # Create a new cycle
 @router.post("/", response_model=AppraisalCycleResponse)
-def create_cycle(cycle_data: AppraisalCycleCreate, db: Session = Depends(get_db)):
+def create_cycle(
+    cycle_data: AppraisalCycleCreate,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     """'
     Create a new appraisal cycle.
     Args:
@@ -62,7 +66,10 @@ def create_cycle(cycle_data: AppraisalCycleCreate, db: Session = Depends(get_db)
 
 # Get all cycles
 @router.get("/", response_model=list[AppraisalCycleResponse])
-def get_cycles(db: Session = Depends(get_db)):
+def get_cycles(
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     try:
         return fetch_all_cycles(db)
     except SQLAlchemyError:
@@ -73,7 +80,10 @@ def get_cycles(db: Session = Depends(get_db)):
 
 # Get all cycles with stage names
 @router.get("/with-stage-names", response_model=list[AppraisalCycleResponseWithStages])
-def get_cycles_with_stage_names(db: Session = Depends(get_db)):
+def get_cycles_with_stage_names(
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     try:
         return fetch_all_cycles_with_stages(db)
     except SQLAlchemyError:
@@ -84,7 +94,11 @@ def get_cycles_with_stage_names(db: Session = Depends(get_db)):
 
 # Get cycle by ID
 @router.get("/{cycle_id}", response_model=AppraisalCycleResponse)
-def get_cycle(cycle_id: int, db: Session = Depends(get_db)):
+def get_cycle(
+    cycle_id: int,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     try:
         cycle = fetch_cycle_by_id(db, cycle_id)
         if not cycle:
@@ -98,7 +112,11 @@ def get_cycle(cycle_id: int, db: Session = Depends(get_db)):
 
 # Delete cycle by ID
 @router.delete("/{cycle_id}")
-def delete_cycle(cycle_id: int, db: Session = Depends(get_db)):
+def delete_cycle(
+    cycle_id: int,
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     try:
         return delete_appraisal_cycle(db, cycle_id)
     except SQLAlchemyError:
@@ -122,7 +140,10 @@ def get_appraisal_cycle_status(cycle_id: int, db: Session = Depends(get_db)):
 @router.get(
     "/appraisal-cycles/historic-report", response_model=list[AppraisalCycleResponse]
 )
-def get_cycles_for_historic_report(db: Session = Depends(get_db)):
+def get_cycles_for_historic_report(
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     try:
         return get_completed_cycles(db)
     except SQLAlchemyError:
@@ -136,7 +157,10 @@ def get_cycles_for_historic_report(db: Session = Depends(get_db)):
     "/appraisal-cycles/self-assessment-report",
     response_model=list[AppraisalCycleResponse],
 )
-def get_cycles_for_self_assessment_report(db: Session = Depends(get_db)):
+def get_cycles_for_self_assessment_report(
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
     try:
         return get_filtered_cycles(db)
     except SQLAlchemyError:

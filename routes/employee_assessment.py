@@ -35,7 +35,7 @@ router = APIRouter(
 def fetch_employee_cycles(
     employee_id: int,
     db: Session = Depends(get_db),
-    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin", "team lead")),
 ):
     """
     Fetch the active and completed cycles for which employee is allocated.
@@ -78,12 +78,11 @@ def fetch_questions(
     employee_id: int,
     cycle_id: int,
     db: Session = Depends(get_db),
-    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin", "team lead")),
 ):
     try:
         questions = get_questions_for_cycle(db, employee_id, cycle_id)
-        if not questions:
-            raise HTTPException(status_code=404, detail="No questions found.")
+        
         return questions
     except SQLAlchemyError:
         raise HTTPException(
@@ -133,9 +132,9 @@ def view_responses(
     employee_id: int,
     cycle_id: int,
     db: Session = Depends(get_db),
-    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+    _user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin", "team lead")),
 ):
     responses = get_readonly_responses(db, employee_id, cycle_id)
     if not responses:
-        raise HTTPException(status_code=404, detail="No responses found.")
+        return []
     return responses

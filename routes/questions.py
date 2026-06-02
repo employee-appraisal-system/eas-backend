@@ -28,10 +28,6 @@ router = APIRouter(
 def list_question(db: Session = Depends(get_db)):
     try:
         questions = get_all_questions(db)
-        if not questions:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="No questions found"
-            )
         return questions
     except SQLAlchemyError as e:
         logging.error(f"Database error when fetching questions: {str(e)}")
@@ -81,7 +77,8 @@ def add_question(question_data: QuestionSchema, db: Session = Depends(get_db)):
                 detail="Question text and type are required",
             )
 
-        if question_data.question_type in ["MCQ", "Single Choice", "Yes/No"]:
+        q_type_lower = question_data.question_type.lower()
+        if q_type_lower in ["mcq", "single choice", "yes/no"]:
             if not question_data.options or len(question_data.options) < 1:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -91,7 +88,7 @@ def add_question(question_data: QuestionSchema, db: Session = Depends(get_db)):
         new_question = add_new_question(question_data, db)
 
         if (
-            question_data.question_type in ["MCQ", "Single Choice", "Yes/No"]
+            q_type_lower in ["mcq", "single choice", "yes/no"]
             and question_data.options
         ):
             add_options(new_question.question_id, question_data.options, db)
