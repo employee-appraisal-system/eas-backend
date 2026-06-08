@@ -3,10 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from database.connection import get_db
 from dao.temp_self_assess_repo import get_response
-from schema.edit_appraisal_cycle import GetAppraisalCycleResponse
-from models.appraisal_cycle import AppraisalCycle
 from logger_config import logging
-from typing import List, Dict
 
 from services.auth_middleware import get_current_user, require_roles
 
@@ -25,28 +22,8 @@ def get_active_cycle(cycle_id: int, db: Session = Depends(get_db)):
 
     """
     try:
-        cycle = (
-            db.query(AppraisalCycle).filter(AppraisalCycle.cycle_id == cycle_id).first()
-        )
-        # if not cycle:
-        #     logging.warning(
-        #         f"Attempt to retrieve self-assessment report for non-existent cycle {cycle_id}"
-        #     )
-        #     raise HTTPException(
-        #         status_code=404, detail=f"Appraisal cycle with ID {cycle_id} not found"
-        #     )
-
-        # logging.info(f"Fetching self-assessment report for cycle {cycle_id}")
-
+             
         responses = get_response(db, cycle_id)
-
-        if not responses:
-            logging.warning(f"No self-assessment responses found for cycle {cycle_id}")
-            raise HTTPException(
-                status_code=404,
-                detail=f"No self-assessment responses found for cycle {cycle_id}",
-            )
-
         logging.info(
             f"Successfully retrieved {len(responses)} self-assessment responses for cycle {cycle_id}"
         )

@@ -202,7 +202,7 @@ def get_employee_ratings(
         List of LeadAssessmentRatingResponse objects containing employee_id and parameter_rating
     """
     try:
-        data = get_overall_rating_of_employee(db, cycle_id)       
+        data = get_overall_rating_of_employee(db, cycle_id)   
         return data
 
     except SQLAlchemyError as exception:

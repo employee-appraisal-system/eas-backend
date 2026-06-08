@@ -33,9 +33,6 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
                 f"Invalid cycle_id: {cycle_id}. Must be a positive integer."
             )
 
-        # Create alias for Question to avoid ambiguity
-        QuestionAlias = aliased(Question)
-
         # Subquery to get distinct questions for the cycle
         subquery_questions = (
             db.query(SelfAssessmentResponse.question_id)
@@ -59,9 +56,7 @@ def get_response(db: Session, cycle_id: int) -> List[Dict[str, str]]:
                 Employee.id,
                 Employee.full_name,
                 Question.question_text,
-                func.coalesce(SelfAssessmentResponse.response_text, literal("-")).label(
-                    "response_text"
-                ),
+                SelfAssessmentResponse.response_text
             )
             .select_from(cross_joined)
             .join(Employee, Employee.id == cross_joined.c.employee_id)
