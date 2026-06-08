@@ -98,7 +98,7 @@ def fetch_parameters(
     cycle_id: int,
     employee_id: int,
     db: Session = Depends(get_db),
-    _scope_user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin")),
+    _scope_user: dict = Depends(require_self_or_roles("employee_id", "hr", "admin", "team lead")),
 ):
     """Fetch appraisal parameters for a given cycle and employee role"""
 
@@ -108,7 +108,7 @@ def fetch_parameters(
         raise HTTPException(status_code=404, detail="Employee not found")
 
     # Determine if employee is a lead
-    is_lead = normalize_role(employee.role) == normalize_role("team lead")
+    is_lead = normalize_role(employee.role) in (normalize_role("team lead"), "lead")
 
     # Fetch parameters based on role
     parameters = get_parameters_for_cycle(db, cycle_id, is_lead)

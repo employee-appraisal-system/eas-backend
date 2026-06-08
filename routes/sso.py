@@ -9,6 +9,10 @@ from services.azure_auth import (
     extract_email_from_claims,
     get_employee_by_azure_email,
 )
+from services.role_mapping import (
+    get_entra_roles_for_user,
+    map_entra_roles_to_app_role,
+)
 
 router = APIRouter(prefix="/auth", tags=["SSO"])
 
@@ -25,6 +29,11 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
     """
     Accepts the authorization code from Microsoft (sent by frontend),
     exchanges it for tokens, validates, and returns employee info.
+
+    The user's app role (HR / Lead / Employee) is determined by querying
+    Entra ID via the Graph API for their directory roles and mapping those
+    roles through the ROLE_MAP_* environment variables.  The role stored in
+    the local database is intentionally NOT used.
 
     Expected body: { "code": "...", "state": "..." }
     """
@@ -46,10 +55,23 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
 
     email = extract_email_from_claims(claims)
 
+    # Look up employee record in the local DB (for id / name only).
     employee = get_employee_by_azure_email(db, email)
 
+    # -----------------------------------------------------------------
+    # Resolve the app role from Entra ID — do NOT trust the DB role.
+    # We call the Graph API with app credentials so we always get the
+    # live directory role assignments for this user.
+    # -----------------------------------------------------------------
+    entra_roles = get_entra_roles_for_user(email)
+    app_role = map_entra_roles_to_app_role(entra_roles)
+    
+    # Fallback to DB role if Entra ID returns the default 'Employee' role, to allow local testing
+    if app_role.lower() == "employee" and employee.role:
+        app_role = employee.role
+
     access_token = create_access_token(
-        {"employee_id": employee.id, "email": employee.email, "role": employee.role}
+        {"employee_id": employee.id, "email": employee.email, "role": app_role}
     )
 
     return {
@@ -59,7 +81,7 @@ def sso_callback(payload: dict, db: Session = Depends(get_db)):
         "employee": {
             "employee_id": employee.id,
             "employee_name": employee.first_name,
-            "role": employee.role,
+            "role": app_role,
         },
         "email": employee.email,
     }

@@ -104,6 +104,7 @@ def add_options(question_id: int, options: List[str], db: Session) -> List[Optio
         ]
         db.add_all(option_objects)
         db.commit()
+        return option_objects
     except IntegrityError as e:
         db.rollback()
         logging.error(

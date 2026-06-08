@@ -29,6 +29,8 @@ def normalize_role(role: str | None) -> str:
 
 def require_roles(*allowed_roles: str):
     allowed = {normalize_role(r) for r in allowed_roles if r}
+    if "teamlead" in allowed:
+        allowed.add("lead")
 
     def _dependency(user: dict = Depends(get_current_user)) -> dict:
         user_role = normalize_role(user.get("role"))
@@ -44,6 +46,8 @@ def require_roles(*allowed_roles: str):
 
 def require_self_or_roles(param_name: str, *privileged_roles: str):
     privileged = {normalize_role(r) for r in privileged_roles if r}
+    if "teamlead" in privileged:
+        privileged.add("lead")
 
     def _dependency(request: Request, user: dict = Depends(get_current_user)) -> dict:
         user_role = normalize_role(user.get("role"))

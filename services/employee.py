@@ -9,12 +9,42 @@ from dao.employee import (
     get_employee_details,
     get_employees_under_team_lead,
 )
+from services.role_mapping import get_entra_roles_for_user
+
+
+def _resolve_employee_role(email: str | None) -> str:
+    if not email:
+        return ""
+    return ", ".join(get_entra_roles_for_user(email))
+
+
+def _serialize_employee(employee):
+    return {
+        "id": employee.id,
+        "first_name": employee.first_name,
+        "last_name": employee.last_name,
+        "full_name": employee.full_name,
+        "email": employee.email,
+        "role": _resolve_employee_role(employee.email),
+        "manager_id": employee.manager_id,
+        "previous_manager_id": employee.previous_manager_id,
+    }
+
+
+def _serialize_employee_row(employee_row):
+    return {
+        "id": employee_row.id,
+        "full_name": employee_row.full_name,
+        "role": _resolve_employee_role(employee_row.email),
+        "reporting_manager_name": employee_row.reporting_manager_name,
+        "previous_reporting_manager_name": employee_row.previous_reporting_manager_name,
+    }
 
 
 # Get list of all employees
 def get_all_employees(db: Session):
     try:
-        return fetch_all_employees(db)
+        return [_serialize_employee(employee) for employee in fetch_all_employees(db)]
     except HTTPException:
         raise
 
@@ -22,7 +52,7 @@ def get_all_employees(db: Session):
 # Get sorted list of all employees
 def get_sorted_employees(db: Session):
     try:
-        return get_all_employees_sorted(db)
+        return [_serialize_employee_row(employee) for employee in get_all_employees_sorted(db)]
     except HTTPException:
         raise
 
@@ -31,7 +61,7 @@ def get_sorted_employees(db: Session):
 def fetch_employees_under_manager(db: Session, manager_id: int):
     try:
         employees = get_employees_under_manager(db, manager_id)
-        return employees
+        return [_serialize_employee(employee) for employee in employees]
     except Exception as e:
         raise e
 
@@ -64,7 +94,7 @@ def fetch_employee_details(db: Session, employee_id: int):
         employee_data = get_employee_details(db, employee_id)
         if not employee_data:
             return None, "Employee not found"
-        return employee_data, None
+        return {"role": _resolve_employee_role(employee_data.email)}, None
     except Exception as e:
         raise e
 
@@ -75,6 +105,6 @@ def fetch_employees_under_team_lead(db: Session, cycle_id: int, team_lead_id: in
         employees = get_employees_under_team_lead(db, cycle_id, team_lead_id)
         if not employees:
             return None, "No employees found for this cycle."
-        return employees, None
+        return [_serialize_employee(employee) for employee in employees], None
     except Exception as e:
         raise e
