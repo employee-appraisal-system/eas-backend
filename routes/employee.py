@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from typing import Optional, List
+from typing import List
 from database.connection import get_db
 from services.employee import (
     get_all_employees,
@@ -12,7 +12,6 @@ from services.employee import (
     fetch_employees_under_team_lead,
 )
 from schema.employee import EmployeeResponse, EmployeeRoleResponse
-from models.employee import Employee
 from services.auth_middleware import (
     get_current_user,
     require_roles,
@@ -147,7 +146,7 @@ def get_employees_for_cycle(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Historical report: get all employees in sorted manner
+# Lead assessment report: get all employees in sorted manner
 @router.get("/employees", response_model=List[EmployeeResponse])
 def get_all_sorted_employees(
     db: Session = Depends(get_db),

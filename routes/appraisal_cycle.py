@@ -136,11 +136,12 @@ def get_appraisal_cycle_status(cycle_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(exception))
 
 
-# Historical report
+# Lead assessment report
 @router.get(
-    "/appraisal-cycles/historic-report", response_model=list[AppraisalCycleResponse]
+    "/appraisal-cycles/lead-assessment-report",
+    response_model=list[AppraisalCycleResponse],
 )
-def get_cycles_for_historic_report(
+def get_cycles_for_lead_assessment_report(
     db: Session = Depends(get_db),
     _user: dict = Depends(require_roles("hr", "admin")),
 ):
@@ -150,6 +151,16 @@ def get_cycles_for_historic_report(
         raise HTTPException(status_code=500, detail="Database error occurred.")
     except Exception as exception:
         raise HTTPException(status_code=500, detail=str(exception))
+
+
+@router.get(
+    "/appraisal-cycles/historic-report", response_model=list[AppraisalCycleResponse]
+)
+def get_cycles_for_historic_report(
+    db: Session = Depends(get_db),
+    _user: dict = Depends(require_roles("hr", "admin")),
+):
+    return get_cycles_for_lead_assessment_report(db, _user)
 
 
 # Self-assessment report

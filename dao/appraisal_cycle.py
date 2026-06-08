@@ -226,37 +226,25 @@ def fetch_cycle_status_by_id(db: Session, cycle_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# get completed and lead assessment active cycles
+# get completed and active cycles for the lead assessment report
 def get_completed_and_lead_assessment_active_cycles(db: Session):
     """
-    Fetch all completed cycles and active cycles for which the "Lead Assessment" stage is active.
+    Fetch all completed cycles and current active cycles for the lead assessment report.
     Args:
         db: Database session
     Returns:
         List of AppraisalCycle objects
     """
     try:
-        # Fetch cycles that are either completed or active for which the "Lead Assessment" stage is either active or completed
         return (
             db.query(AppraisalCycle)
-            .join(Stage, AppraisalCycle.cycle_id == Stage.cycle_id)
-            .filter(
-                or_(
-                    AppraisalCycle.status == "completed",
-                    and_(
-                        AppraisalCycle.status == "active",
-                        Stage.stage_name == "Lead Assessment",
-                        or_(Stage.is_active == True, Stage.is_completed == True),
-                    ),
-                )
-            )
-            .distinct()
+            .filter(AppraisalCycle.status.in_(["completed", "active"]))
             .all()
         )
     except SQLAlchemyError:
         raise HTTPException(
             status_code=500,
-            detail="Database error while fetching lead assessment cycles.",
+            detail="Database error while fetching lead assessment report cycles.",
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

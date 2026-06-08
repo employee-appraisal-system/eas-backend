@@ -68,7 +68,7 @@ def get_employee_details(db: Session, employee_id: int):
         employee = db.query(Employee).filter(Employee.id == employee_id).first()
         if not employee:
             return None
-        return {"role": employee.role}
+        return employee
     except SQLAlchemyError as e:
         raise Exception(
             f"Database error occurred while fetching employee details for {employee_id}: {str(e)}"
@@ -111,7 +111,7 @@ def get_all_employees_sorted(db: Session):
             db.query(
                 Employee.id,
                 Employee.full_name,
-                Employee.role,
+                Employee.email,
                 manager.full_name.label("reporting_manager_name"),
                 prev_manager.full_name.label("previous_reporting_manager_name"),
             )
